@@ -1,0 +1,7 @@
+*.zip
+pd-extended/*
+*~
+*MACOSX
+*#
+pd/*
+template/*

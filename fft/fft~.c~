@@ -1,0 +1,79 @@
+#include <stdlib.h>
+#include "myfft_fft.c"
+#include "fft~.h"
+
+#define PI 3.14159265358979323846
+#define DSP_ADD_LENGTH 4
+#define VECTOR_SIZE 1024
+
+t_int *fft_tilde_perform(t_int *w){
+  
+  t_fft_tilde *x = (t_fft_tilde *)(w[1]);
+  t_sample *in = (t_sample *)(w[2]);
+  t_sample *out = (t_sample *)(w[3]);
+
+  int n = (int)(w[4]), i;
+  
+  for(i=0;i<n;i++) {
+    *in = (*in) + 1;
+    out[i] = x->window[i] * (*in) ;
+  }
+  
+  rdft(VECTOR_SIZE, 1, out, x->bitshuffle, x->weighting);
+  return (w+DSP_ADD_LENGTH+1);
+  
+}
+
+
+void fft_tilde_dsp(t_fft_tilde *x, t_signal **sp){
+  dsp_add(fft_tilde_perform, DSP_ADD_LENGTH, x,
+    sp[0]->s_vec, sp[1]->s_vec, sp[0]->s_n);
+}
+
+
+void fft_tilde_free(t_fft_tilde *x){
+  free(x->window);
+  free(x->bitshuffle);
+  free(x->weighting);
+  outlet_free(x->x_out);
+}
+
+
+void *fft_tilde_new(void)
+{
+  t_fft_tilde *m;
+  m = (t_fft_tilde *)pd_new(fft_tilde_class);
+  m->x_out = outlet_new(&m->x_obj, &s_signal);
+  
+  m->window = malloc(VECTOR_SIZE * (sizeof * m->window));
+  m->bitshuffle = malloc(2*VECTOR_SIZE * (sizeof * m->bitshuffle));
+  m->weighting = malloc(2*VECTOR_SIZE * (sizeof * m->weighting));
+  
+  int i;
+  for (i=0;i<VECTOR_SIZE;i++) {
+    m->window[i] = (float) (0.42-0.5*(cos (2*PI * i/VECTOR_SIZE) )+0.08*(cos (4*PI*i/VECTOR_SIZE)) );
+  }  
+  init_rdft(VECTOR_SIZE, m->bitshuffle, m->weighting);
+  
+  return (void *)m;
+}
+
+
+void fft_tilde_setup(void){
+
+  fft_tilde_class = class_new(gensym("fft~"),
+				(t_newmethod)fft_tilde_new,
+				(t_method) fft_tilde_free,
+				sizeof(t_fft_tilde),
+				CLASS_DEFAULT,
+				0);
+  
+  class_addmethod(fft_tilde_class,
+		  (t_method)fft_tilde_dsp,
+		  gensym("dsp"),
+		  0);
+  
+  CLASS_MAINSIGNALIN(fft_tilde_class,
+		     t_fft_tilde,
+		     f);
+}

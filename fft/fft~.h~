@@ -1,0 +1,32 @@
+#ifndef _fft_H_
+#define _fft_H_
+
+#include "m_pd.h"
+
+static t_class *fft_tilde_class;
+
+typedef struct _fft_tilde {
+
+  t_object x_obj;
+
+  t_sample f_pan;
+  t_sample f;
+
+  t_outlet *x_out;
+
+  int *bitshuffle;
+  float *weighting;
+  float *window;
+
+}  t_fft_tilde;
+
+
+
+t_int *fft_tilde_perform(t_int *w);
+void fft_tilde_dsp(t_fft_tilde *x, t_signal **sp);
+void fft_tilde_free(t_fft_tilde *x);
+void *fft_tilde_new(void);
+void fft_tilde_setup(void);
+
+
+#endif
