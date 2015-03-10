@@ -7,48 +7,78 @@
 #define VECTOR_SIZE 4096
 #define WAIT_UNTIL_PERFORM 4
 
+
+void init_with_blackman(t_sample *in){
+
+  int i;
+  for (i=0;i<VECTOR_SIZE;i++) {
+    in[i] = (float) (0.42-0.5*(cos (2*PI * i/VECTOR_SIZE) )+0.08*(cos (4*PI*i/VECTOR_SIZE)) );
+  }
+
+}
+
+void apply_blackman(t_sample *in, t_sample *blackman){
+  int i=0;
+  for(i=0;i<VECTOR_SIZE;i++){
+    in[i] = blackman[i] * in[i];
+  }
+}
+
+void copy_to_out_signal(t_sample *in, t_sample *out, int n){
+  int i=0;
+  for(i=0;i<n;i++){
+    out[i]= in[i];
+  }  
+}
+
+void shift_signal(t_sample *in, int n){
+  int i=0;
+  for(i=0;i<VECTOR_SIZE-n;i++){
+    in[i]=in[i+n];
+  }
+}
+
+void apply_buffered_fft(t_sample *in, int *bitshuffle, float *weighting){
+  int i=0;  
+  for(i=0;i<=VECTOR_SIZE;i+=1024){
+    rdft((VECTOR_SIZE/WAIT_UNTIL_PERFORM), 1, in+i, bitshuffle, weighting);
+  }
+}
+
+void refresh_buffer_with_incoming_signal(t_sample *buffer, t_sample*in, int n){
+  int i=0;
+  for(i=0;i<n;i++) {
+    buffer[VECTOR_SIZE-n+i]=*in++;
+  }
+}
+
 t_int *myfft_tilde_perform(t_int *w){
 
   t_myfft_tilde *x = (t_myfft_tilde *)(w[1]);
   t_sample *in = (t_sample *)(w[2]);
   t_sample *out = (t_sample *)(w[3]);  
-  int i,n = (int)(w[4]);
- 
-  for(i=0;i<n;i++) {
-    x->circularbuffer[VECTOR_SIZE-n+i]=*in++;
-  }
+  int n = (int)(w[4]);
+  
+
+  refresh_buffer_with_incoming_signal(x->circularbuffer,in,n);
   x->bitnumber+= VECTOR_SIZE;
   
   
   if(x->bitnumber >= (WAIT_UNTIL_PERFORM*VECTOR_SIZE)){
     x->bitnumber=0;
     x->complete=1;
-
-    for(i=0;i<VECTOR_SIZE;i++){
-      x->circularbuffer[i] = x->window[i] * x->circularbuffer[i];
-    }
     
-    for(i=0;i<=VECTOR_SIZE;i+=1024){
-      rdft((VECTOR_SIZE/WAIT_UNTIL_PERFORM), 1, x->circularbuffer+i, x->bitshuffle, x->weighting);
-    }
+    apply_blackman(x->circularbuffer,x->window);
+    apply_buffered_fft(x->circularbuffer,x->bitshuffle,x->weighting);
   }
   
   if(x->complete==1){
-    for(i=0;i<n;i++){
-      out[i]= x->circularbuffer[i];
-    }
+    copy_to_out_signal(x->circularbuffer,out,n);
   }
-
-
-
-  for(i=0;i<VECTOR_SIZE-n;i++){
-    x->circularbuffer[i]=x->circularbuffer[i+n];
-  }
-
+  
+  shift_signal(x->circularbuffer,n);
+  
   return (w+DSP_ADD_LENGTH+1);
-
-
-
 }
 
 
@@ -81,10 +111,7 @@ void *myfft_tilde_new(void)
   m->complete=0;
   m->bitnumber=0;
 
-  int i;
-  for (i=0;i<VECTOR_SIZE;i++) {
-    m->window[i] = (float) (0.42-0.5*(cos (2*PI * i/VECTOR_SIZE) )+0.08*(cos (4*PI*i/VECTOR_SIZE)) );
-  }  
+  init_with_blackman(m->window);
   init_rdft(VECTOR_SIZE, m->bitshuffle, m->weighting);
   
   return (void *)m;
