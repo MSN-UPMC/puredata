@@ -1,0 +1,1 @@
+#include <math.h>void        init_rdft(int n, int *ip, float *w);void        rdft(int n, int isgn, float *a, int *ip, float *w);void        bitrv2(int n, int *ip, float *a);void        cftsub(int n, float *a, float *w);void        rftsub(int n, float *a, int nc, float *c);void        makewt(int nw, int *ip, float *w);void        makect(int nc, int *ip, float *c);

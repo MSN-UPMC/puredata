@@ -1,12 +1,11 @@
-#ifndef _fft_H_
-#define _fft_H_
+#ifndef _fft_h_
+#define _fft_h_
 
 #include "m_pd.h"
 
 static t_class *myfft_tilde_class;
 
 typedef struct _myfft_tilde {
-
   t_object x_obj;
 
   t_sample f_pan;
@@ -20,8 +19,7 @@ typedef struct _myfft_tilde {
   float *window;
   int bitnumber;
   int complete;
-
-}  t_myfft_tilde;
+} t_myfft_tilde;
 
 
 
