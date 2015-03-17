@@ -1,0 +1,67 @@
+#N canvas 321 99 829 547 10;
+#X obj 99 150 readsf~;
+#X msg 53 114 stop;
+#X obj 52 79 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X msg 102 110 open piano.wav \, 1;
+#X text 91 78 Piano Solo;
+#X obj 292 321 synthe;
+#X text 402 228 ShapeWidth;
+#X text 403 257 Autonorm;
+#X text 402 291 Bypass;
+#X obj 291 360 dac~;
+#X msg 373 227 0.5;
+#X obj 323 142 readsf~;
+#X msg 277 106 stop;
+#X obj 276 71 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X text 315 70 Piano Solo;
+#X obj 207 24 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X msg 374 256 1 0;
+#X msg 372 291 1 1;
+#X msg 326 102 open bassBeatsViolon.wav \, 1;
+#X obj 43 229 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 43 257 metro 50;
+#N canvas 0 50 450 250 (subpatch) 0;
+#X array sound 100 float 3;
+#A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0;
+#X coords 0 1 100 -1 200 140 1 0 0;
+#X restore 42 332 graph;
+#X obj 43 293 tabwrite~ sound;
+#X obj 491 136 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 491 164 metro 50;
+#N canvas 0 50 450 250 (subpatch) 0;
+#X array sound2 25 float 3;
+#A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
+#X coords 0 1 24 -1 200 140 1 0 0;
+#X restore 490 239 graph;
+#X obj 491 200 tabwrite~ sound2;
+#X connect 0 0 5 0;
+#X connect 0 0 22 0;
+#X connect 0 1 2 0;
+#X connect 1 0 0 0;
+#X connect 2 0 3 0;
+#X connect 3 0 0 0;
+#X connect 5 0 9 0;
+#X connect 5 0 9 1;
+#X connect 10 0 5 2;
+#X connect 11 0 5 1;
+#X connect 11 0 26 0;
+#X connect 11 1 13 0;
+#X connect 12 0 11 0;
+#X connect 13 0 18 0;
+#X connect 15 0 18 0;
+#X connect 15 0 3 0;
+#X connect 16 0 5 3;
+#X connect 17 0 5 3;
+#X connect 18 0 11 0;
+#X connect 19 0 20 0;
+#X connect 20 0 22 0;
+#X connect 23 0 24 0;
+#X connect 24 0 26 0;
