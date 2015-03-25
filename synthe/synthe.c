@@ -7,6 +7,9 @@
 #define DSP_ADD_LENGTH 5
 #define VECTOR_SIZE 2048
 
+/* Fill vector with begin values according to BlackMan
+ * @param A vector to fill
+ */
 void init_with_blackman(t_sample *in){
   int i;
   for (i=0;i<VECTOR_SIZE;i++) {
@@ -14,7 +17,11 @@ void init_with_blackman(t_sample *in){
   }
 }
 
-
+/* Copy a signal into another
+ * @param A vector model
+ * @param A vector copied from the model
+ * @param Size of vector 
+ */
 void copy_to_out_signal(t_sample *in, t_sample *out, int n){
   int i;
   for(i=0;i<n;i++){
@@ -22,10 +29,18 @@ void copy_to_out_signal(t_sample *in, t_sample *out, int n){
   }  
 }
 
+/* Naive euclidienne distance
+ * @param first element for the distance
+ * @param second element for the distance
+ */
 float distance_euclidienne(float x, float y){
   return sqrtf(x*x+y*y);
 }
 
+/* Apply BlackMan to a vector
+ * @param A vector to be applied
+ * @param A vector with blackman values
+ */
 void apply_blackman(t_sample *in1, t_sample *in2,  t_sample *blackman, int n){
   int i;
   for(i=0;i<n;i++){
@@ -33,6 +48,10 @@ void apply_blackman(t_sample *in1, t_sample *in2,  t_sample *blackman, int n){
   }
 }
 
+/* Trigger function for Pure Data DSP 
+ *  @param  Vector which contains DSP add informations 
+ *  @return Size of Vector and add one 
+ */
 t_int *synthe_perform(t_int *w){
 
   t_synthe *x=(t_synthe*)(w[1]);  
@@ -109,11 +128,9 @@ t_int *synthe_perform(t_int *w){
   return w+6;
 }
 
-
-
-
-
-
+/* Initialize synthe on PureData 
+   @param (autonorm value)? (bypass value)?
+ */
 void *synthe_new(int argc, t_atom *argv){
 
   t_synthe *m = (t_synthe *)pd_new(synthe_class);
@@ -147,24 +164,27 @@ void *synthe_new(int argc, t_atom *argv){
   return (void*)m;
 }
 
-
-
-
-
-
-
+/* Add myfft~ into DSP stack 
+ *  @param myfft~ object
+ *  @param input signal
+ */
 void synthe_dsp(t_synthe *x, t_signal **sp){
   dsp_add(synthe_perform, DSP_ADD_LENGTH, x,  
           sp[0]->s_vec, sp[1]->s_vec, sp[2]->s_vec, sp[0]->s_n); 
 }
 
-
-
+/* Message inlet to manage autonorm and bypass 
+ * @param autonorm value
+ * @param bypass value
+*/
 void synthe_messages(t_synthe *x, t_floatarg n, t_floatarg p){
   x->autonorm=n;
   x->bypass=p;
 }
 
+/* Free the memory of myfft~ 
+ *  @param myfft~ object 
+ */
 void synthe_free(t_synthe *x){
   free(x->window);
   free(x->bitshuffle);
@@ -175,6 +195,7 @@ void synthe_free(t_synthe *x){
   outlet_free(x->x_out);
 }
 
+/* Setup synthe on PureData */
 void synthe_setup(void){
   synthe_class = class_new(gensym("synthe"),(t_newmethod)synthe_new,(t_method) synthe_free, sizeof(t_synthe),CLASS_DEFAULT, A_GIMME, 0);
   class_addmethod(synthe_class, (t_method)synthe_dsp, gensym("dsp"), 0);
